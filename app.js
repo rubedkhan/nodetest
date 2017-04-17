@@ -1,38 +1,68 @@
-// call the packages we need
-var express    = require('express');        // call express
-var app        = express();                 // define our app using express
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var path = require('path');
- 
- 
-  
-// configure app to use bodyParser()
-// this will let us get the data from a POST
-app.use(bodyParser.urlencoded({ extended: true }));
+//Created date 17-04-2017
+var express = require('express'),
+    app = express(),
+    path = require('path'),
+    logger = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser'),
+    compression = require('compression');
+
+var logConfig = {
+    skip: function(req, res) {
+        return res.statusCode < 400
+    }
+};
+
+app.use(logger('dev', logConfig));
+
+app.use(compression({ filter: shouldCompress }));
+
+function shouldCompress(req, res) {
+    if (req.headers['x-no-compression']) {
+        // don't compress responses with this request header
+        return false
+    }
+    // fallback to standard filter function
+    return compression.filter(req, res)
+}
+
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
-var port = process.env.PORT || 7000;        // set our port
+app.listen(2149, function() {
+    console.log('listening on 2149')
+})
 
-//Database connection
-mongoose.connect('mongodb://localhost:27017/test', function(err, db) {
-	if(!err){
-      console.log("Mongodb connected");
-	}
+app.all('/*', function(req, res, next) {
+    // Just send the index.html for other files to support HTML5Mode
+    res.sendFile('index.html', { root: path.join(__dirname, 'public') });
 });
 
-// ROUTES FOR OUR API
-// =============================================================================
- require('routes/routes.js')(app);
+// error handlers
 
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+    app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.json({
+            success: false,
+            message: err.message,
+            error: err
+        });
+    });
+}
 
-// more routes for our API will happen here
-
-// REGISTER OUR ROUTES -------------------------------
-// all of our routes will be prefixed with /api
-app.use('/api', router);
-
-// START THE SERVER
-// =============================================================================
-app.listen(port);
-console.log('Magic happens on port ' + port);
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.json({
+        success: false,
+        message: err.message,
+        error: err
+    });
+});
+module.exports = app;
