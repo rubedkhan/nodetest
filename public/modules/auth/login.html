@@ -1,0 +1,22 @@
+ <div class="container" >
+            <form id="contact" name="loginForm" novalidate>
+                <h3>Login</h3>
+                <fieldset>
+                    <input placeholder="Username" type="text" name="username" ng-model="loginFormObj.username" required>
+                    <div ng-show="loginForm.$submitted || loginForm.username.$touched">
+                        <span class="text-danger" ng-show="loginForm.username.$error.required">User name is required.</span>
+                       
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <input type="text" placeholder="Password" name="password" ng-model="loginFormObj.password" minlength="6" required> 
+                    <div ng-show="loginForm.$submitted || loginForm.password.$touched">
+                        <span class="text-danger" ng-show="loginForm.password.$error.required">Password is required.</span>
+                        <span class="text-danger" ng-show="loginForm.password.$error.minlength">Min 6 character is required.</span>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <button name="submit" type="submit" id="contact-submit" ng-click="login()" ng-disabled="loginBtn">Login</button>
+                </fieldset>
+            </form>
+        </div>
