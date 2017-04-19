@@ -5,6 +5,8 @@ var express = require('express'),
     fs = require('fs'),
     path = require('path'),
     logger = require('morgan'),
+	mongoose = require('mongoose'),
+	config   = require('./config/Configuration'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     compression = require('compression');
@@ -34,7 +36,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
+mongoose.connect(config.database.mongodb.url, function (err) {
+    if (err) {
+        console.log(err);
+        process.exit(0);
+    } else {
+        console.log('Mongodb connected');
+    }
+});
 
 /**
  * Get port from environment and store in Express.
